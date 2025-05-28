@@ -1,0 +1,5 @@
+streamlit
+google-generativeai
+requests
+beautifulsoup4
+python-dotenv # .envファイルを使用する場合に必要

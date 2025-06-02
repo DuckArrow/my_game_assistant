@@ -28,7 +28,7 @@ def initialize_gemini_model(api_key: str):
     try:
         # ここに使用したいGeminiモデル名を指定してください。
         # 例: 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.5-flash-preview-05-20', 'gemini-2.5-pro-preview-05-06'
-        model = genai.GenerativeModel(model_name='gemini-2.5-pro-preview-05-06')
+        model = genai.GenerativeModel(model_name='gemini-2.5-pro-preview-05-20')
         return model
     except Exception as e:
         # Streamlitアプリから呼ばれる際は、エラーはStreamlit側で処理されます。

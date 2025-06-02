@@ -20,7 +20,7 @@ def list_available_models(api_key: str):
 def initialize_gemini_model(api_key: str):
     """
     GeminiモデルをAPIキーで初期化します。
-    ここでは、より高度な'gemini-2.5-pro-preview-05-06'モデルを使用します。
+    ここでは、より高度な'gemini-2.5-flash-preview-05-20'モデルを使用します。
     このモデルは、必要に応じて自動的にWeb検索（Grounding）を活用します。
     """
     genai.configure(api_key=api_key)
@@ -28,7 +28,7 @@ def initialize_gemini_model(api_key: str):
     try:
         # ここに使用したいGeminiモデル名を指定してください。
         # 例: 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.5-flash-preview-05-20', 'gemini-2.5-pro-preview-05-06'
-        model = genai.GenerativeModel(model_name='gemini-2.5-pro-preview-05-20')
+        model = genai.GenerativeModel(model_name='gemini-2.5-flash-preview-05-20')
         return model
     except Exception as e:
         # Streamlitアプリから呼ばれる際は、エラーはStreamlit側で処理されます。

@@ -32,7 +32,7 @@ def initialize_gemini_model(api_key: str):
     
     # 環境変数からモデル名を読み込む。設定されていなければ 'gemini-1.5-flash' をデフォルトとする。
     # このモデルは無料枠で利用できることが多い。
-    model_name = os.getenv("GEMINI_MODEL_NAME", "gemini-1.5-flash")
+    model_name = os.getenv("GEMINI_MODEL_NAME", "gemini-2.5-flash-preview-05-20")
 
     try:
         model = genai.GenerativeModel(model_name=model_name)

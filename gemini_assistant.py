@@ -1,5 +1,11 @@
 import google.generativeai as genai
 import os
+from dotenv import load_dotenv # python-dotenv ライブラリをインポート
+
+# .envファイルを読み込む (スクリプトの先頭で呼び出すのが一般的)
+# これにより、.envファイルに定義された変数が os.environ に追加される
+# ただし、すでに環境変数として設定されている場合はそちらが優先される
+load_dotenv() 
 
 def list_available_models(api_key: str):
     """
@@ -20,20 +26,20 @@ def list_available_models(api_key: str):
 def initialize_gemini_model(api_key: str):
     """
     GeminiモデルをAPIキーで初期化します。
-    ここでは、より高度な'gemini-2.5-flash-preview-05-20'モデルを使用します。
-    このモデルは、必要に応じて自動的にWeb検索（Grounding）を活用します。
+    環境変数 GEMINI_MODEL_NAME があればそれを使用し、なければデフォルト値を使用します。
     """
     genai.configure(api_key=api_key)
     
+    # 環境変数からモデル名を読み込む。設定されていなければ 'gemini-1.5-flash' をデフォルトとする。
+    # このモデルは無料枠で利用できることが多い。
+    model_name = os.getenv("GEMINI_MODEL_NAME", "gemini-1.5-flash")
+
     try:
-        # ここに使用したいGeminiモデル名を指定してください。
-        # 例: 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.5-flash-preview-05-20', 'gemini-2.5-pro-preview-05-06'
-        model = genai.GenerativeModel(model_name='gemini-2.5-flash-preview-05-20')
+        model = genai.GenerativeModel(model_name=model_name)
+        print(f"Geminiモデル '{model_name}' を初期化しました。") # 初期化したモデル名を表示
         return model
     except Exception as e:
-        # Streamlitアプリから呼ばれる際は、エラーはStreamlit側で処理されます。
-        # ここでは、デバッグ目的でエラーメッセージを出力します。
-        print(f"Geminiモデルの初期化中にエラーが発生しました。APIキーが正しいか、またはモデル名'{model.model_name}'が利用可能か確認してください: {e}")
+        print(f"Geminiモデルの初期化中にエラーが発生しました。APIキーが正しいか、またはモデル名'{model_name}'が利用可能か確認してください: {e}")
         return None
 
 def ask_gemini(model, conversation_history: list[dict]) -> str | None:
@@ -41,8 +47,6 @@ def ask_gemini(model, conversation_history: list[dict]) -> str | None:
     会話履歴全体をGeminiモデルに渡し、回答を取得します。
     """
     try:
-        # Geminiモデルに会話履歴を送信し、回答を生成
-        # safety_settingsは、生成されるコンテンツの安全性を制御します。
         response = model.generate_content(
             contents=conversation_history,
             safety_settings=[
@@ -54,7 +58,6 @@ def ask_gemini(model, conversation_history: list[dict]) -> str | None:
         )
         return response.text
     except Exception as e:
-        # Gemini API呼び出し中のエラーを処理し、デバッグメッセージを出力します。
         print(f"Gemini API呼び出し中にエラーが発生しました: {e}")
         print("APIキーが正しいか、ネットワーク接続を確認してください。")
         print("また、プロンプトの長さがモデルの最大トークン制限を超えていないか確認してください。")
@@ -64,20 +67,22 @@ if __name__ == '__main__':
     # このブロックは、このスクリプトを直接実行した場合にのみ実行されます。
     # Streamlitアプリから呼ばれる場合は実行されません。
 
+    # 環境変数 GEMINI_API_KEY を取得
+    # load_dotenv() により、.envファイルの値もここで参照可能になる
     gemini_api_key = os.getenv("GEMINI_API_KEY")
 
     if not gemini_api_key:
         print("エラー: GEMINI_API_KEY環境変数が設定されていません。")
-        print("APIキーを設定してから再度実行してください。")
-        print("例: export GEMINI_API_KEY='YOUR_API_KEY_HERE' (Linux/macOS/WSL)")
-        print("または PowerShell: $env:GEMINI_API_KEY='YOUR_API_KEY_HERE'")
+        print("APIキーを環境変数として設定するか、.envファイルに記述してから再度実行してください。")
         exit()
 
-    list_available_models(gemini_api_key) # テスト実行時のみ利用可能なモデルリストを表示
+    # テスト実行時のみ利用可能なモデルリストを表示 (必要であれば)
+    # list_available_models(gemini_api_key)
 
     gemini_model = initialize_gemini_model(gemini_api_key)
 
     if gemini_model:
+        # テスト用のゲーム名、URL、質問
         test_game_name = "ゼルダの伝説 ティアーズ オブ ザ キングダム"
         test_url = "https://www.nintendo.co.jp/zelda/totk/guide/" # テスト用URL
 
@@ -125,4 +130,3 @@ if __name__ == '__main__':
             print("Gemini APIからの回答取得に失敗しました。")
     else:
         print("Geminiモデルの初期化に失敗したため、処理を中断します。")
-
